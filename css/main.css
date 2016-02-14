@@ -2,9 +2,10 @@
 canvas{
 	border:solid 1px black;
 	border-radius:15px;
-	display:inline;
+	display:block;
 	position:relative;
 	background-color:white;
+	
 }
 
 #canvasFrame{
@@ -15,4 +16,7 @@ canvas{
 	height:600px;
 	border-radius:15px;
 	background-color:gold;
+}
+.hidden{
+	display:none;
 }
