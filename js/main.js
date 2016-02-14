@@ -1,6 +1,16 @@
 $(document).ready(function(){
 		$("#startGame").click(startGame);
+		$("#gameCanvas").mousedown(function(){
+			$("#gameCanvas").css("cursor","move");
+			console.log(getMouseCoordsOnCanvas());
+		});
+		$("#gameCanvas").mouseup(function()
+		{		
+			$("#gameCanvas").css("cursor","default");
+			console.log("release"+getMouseCoordsOnCanvas());
+		});
 });
+
 
 //Starts the game
 function startGame(){
@@ -16,8 +26,16 @@ function drawGameImage()
     ctx.drawImage(img, 10,10);
 	
 	var imageData = ctx.getImageData(0,0,510,510);
-	ctx.putImageData( addGrid(imageData) ,0,0);
+	ctx.putImageData( addGridToImage(imageData) ,0,0);
+	
+}
 
+//Function to get mouse coordinates
+function getMouseCoordsOnCanvas()
+{
+	var x = event.pageX-$("#gameCanvas").get(0).offsetLeft - 10;
+	var y = event.pageY-$("#gameCanvas").get(0).offsetTop - 10;
+	return [x, y];
 }
 
 //Functions to get index from imagedata object
@@ -42,7 +60,7 @@ function getAlphaValueIndex(width, x, y)
 }
 
 //Function to add grid to image
-function addGrid(imageData)
+function addGridToImage(imageData)
 {
 	for(var i = 102; i < imageData.data.length; i += 102)
 	{	
