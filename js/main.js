@@ -7,18 +7,22 @@ var CANVASMARGIN = 10;
 //number of rows and columns of the puzzlepieces
 var NUM_ROWS_COLS_PIECES = 5;
 var correctSolution = new Array(NUM_ROWS_COLS_PIECES*NUM_ROWS_COLS_PIECES);
+var currentPositions = new Array(NUM_ROWS_COLS_PIECES*NUM_ROWS_COLS_PIECES);
+var grabbedPiece = null;
 
-$(document).ready(function(){
-		$("#startGame").click(startGame);
-		$("#gameCanvas").mousedown(mouseDownOnCanvas);
-		$("#gameCanvas").mouseup(mouseUpOnCanvas);
-		canvas = document.getElementById("gameCanvas");
-		ctx = canvas.getContext("2d");
+$(document).ready(function()
+{
+	$("#startGame").click(startGame);
+	$("#gameCanvas").mousedown(mouseDownOnCanvas).mouseup(mouseUpOnCanvas);
+	canvas = document.getElementById("gameCanvas");
+	ctx = canvas.getContext("2d");
 });
+
 //Starts the game
-function startGame(){
+function startGame()
+{
 	drawGameImage();
-	console.log(correctSolution);
+	currentPositions = correctSolution;
 }
 
 //Draws image on canvas
@@ -27,24 +31,32 @@ function drawGameImage()
     var img = document.getElementById("first");
     ctx.drawImage(img, CANVASMARGIN,CANVASMARGIN);
 	createPuzzlePieces(img.width, img.height, ctx);
-
 }
-function mouseDownOnCanvas(event){
+
+function mouseDownOnCanvas(event)
+{
 	$("#gameCanvas").css("cursor","move");
-	console.log(getMouseCoordsOnCanvas(event));
+	grabbedPiece = getPuzzlePieceUnderCursor(getMouseCoordsOnCanvas(event));
+	if(grabbedPiece != null)
+		grabPuzzlePiece(grabbedPiece);
+}
+
+function mouseMoveOnCanvas(event)
+{
+	console.log(event.pageX);
 }
 
 function mouseUpOnCanvas(event)
 {
 	$("#gameCanvas").css("cursor","default");
-	console.log("release"+getMouseCoordsOnCanvas(event));
+	releasePuzzlePiece(getMouseCoordsOnCanvas(event));
 }
 
 //Function to get mouse coordinates
 function getMouseCoordsOnCanvas(event)
 {
-	var x = event.pageX-$("#gameCanvas").get(0).offsetLeft - CANVASMARGIN;
-	var y = event.pageY-$("#gameCanvas").get(0).offsetTop - CANVASMARGIN;
+	var x = event.pageX - $("#gameCanvas").get(0).offsetLeft - CANVASMARGIN;
+	var y = event.pageY - $("#gameCanvas").get(0).offsetTop  - CANVASMARGIN;
 	return [x, y];
 }
 
@@ -75,19 +87,48 @@ function createPuzzlePieces(imageWidth, imageHeight, context){
 	var puzzlePieceWidth = imageWidth/NUM_ROWS_COLS_PIECES;
 	var puzzlePieceHeight = imageHeight/NUM_ROWS_COLS_PIECES;
 	var k = 0;
-	for(var i =0;i<imageWidth;i+=puzzlePieceWidth)
+	for(var i =0;i<imageHeight;i+=puzzlePieceHeight)
 	{
-		for(var j=0;j<imageHeight;j+=puzzlePieceHeight)
+		for(var j=0;j<imageWidth;j+=puzzlePieceWidth)
 		{
 			context.strokeRect(CANVASMARGIN+i,CANVASMARGIN+j,puzzlePieceWidth,puzzlePieceHeight);
-			correctSolution[k] = new puzzlePiece(CANVASMARGIN + i, CANVASMARGIN + j, puzzlePieceWidth, puzzlePieceHeight, ctx.getImageData(CANVASMARGIN + i,CANVASMARGIN + j, puzzlePieceWidth, puzzlePieceHeight));
+			correctSolution[k] = new puzzlePiece(CANVASMARGIN + j, CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight, ctx.getImageData(CANVASMARGIN + j,CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight));
 			k++;
 		}
 	}
 }
 
+function getPuzzlePieceUnderCursor(coords)
+{
+	var l = currentPositions.length;
+	for(var i = 0;i<l;i++)
+	{
+		if(coords[0] >= currentPositions[i].xPos && 
+		   coords[0] <= currentPositions[i].xPos + currentPositions[i].width &&
+		   coords[1] >= currentPositions[i].yPos &&
+		   coords[1] <= currentPositions[i].yPos + currentPositions[i].height)
+				return currentPositions[i];
+	}
+	return null;
+}
+
+function grabPuzzlePiece(puzzlePiece)
+{
+	ctx.clearRect(puzzlePiece.xPos, puzzlePiece.yPos, puzzlePiece.width, puzzlePiece.height);
+	//animateMove();
+}
+
+function releasePuzzlePiece(coords)
+{
+	grabbedPiece.xPos = coords[0];
+	grabbedPiece.yPos = coords[1];
+	ctx.putImageData(grabbedPiece.pixels,coords[0],coords[1])
+	console.log("Release: "+coords);
+}
+
 //Puzzlepiece object
 function puzzlePiece(x, y, width, height,imageData){
+
 	this.xPos = x;
 	this.yPos = y;
 	this.width = width;
