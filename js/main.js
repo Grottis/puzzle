@@ -1,15 +1,13 @@
 $(document).ready(function(){
 		$("#startGame").click(startGame);
-		$("#gameCanvas").mousedown(function(){
-			$("#gameCanvas").css("cursor","move");
-			console.log(getMouseCoordsOnCanvas());
-		});
-		$("#gameCanvas").mouseup(function()
-		{		
-			$("#gameCanvas").css("cursor","default");
-			console.log("release"+getMouseCoordsOnCanvas());
-		});
+		$("#gameCanvas").mousedown(mouseDownOnCanvas);
+		$("#gameCanvas").mouseup(mouseUpOnCanvas);
 });
+//Global constants
+//number of pixels to use as border
+var CANVASMARGIN = 10;
+//number of rows and columns of the puzzlepieces
+var NUM_ROWS_COLS_PIECES = 5;
 
 
 //Starts the game
@@ -23,18 +21,25 @@ function drawGameImage()
 	var canvas = document.getElementById("gameCanvas");
     var ctx = canvas.getContext("2d");
     var img = document.getElementById("first");
-    ctx.drawImage(img, 10,10);
-	
-	var imageData = ctx.getImageData(0,0,510,510);
-	ctx.putImageData( addGridToImage(imageData) ,0,0);
-	
+    ctx.drawImage(img, CANVASMARGIN,CANVASMARGIN);
+	addGridToImage(img.width, img.height,ctx);
+}
+function mouseDownOnCanvas(event){
+			$("#gameCanvas").css("cursor","move");
+			console.log(getMouseCoordsOnCanvas(event));
 }
 
+function mouseUpOnCanvas(event)
+		{
+			$("#gameCanvas").css("cursor","default");
+			console.log("release"+getMouseCoordsOnCanvas(event));
+		}
+
 //Function to get mouse coordinates
-function getMouseCoordsOnCanvas()
+function getMouseCoordsOnCanvas(event)
 {
-	var x = event.pageX-$("#gameCanvas").get(0).offsetLeft - 10;
-	var y = event.pageY-$("#gameCanvas").get(0).offsetTop - 10;
+	var x = event.pageX-$("#gameCanvas").get(0).offsetLeft - CANVASMARGIN;
+	var y = event.pageY-$("#gameCanvas").get(0).offsetTop - CANVASMARGIN;
 	return [x, y];
 }
 
@@ -60,17 +65,15 @@ function getAlphaValueIndex(width, x, y)
 }
 
 //Function to add grid to image
-function addGridToImage(imageData)
-{
-	for(var i = 102; i < imageData.data.length; i += 102)
-	{	
-			imageData.data[getRedValueIndex(510,i,11)] = 0;
-			
-			for(var j = 12; j < 510; j++)
-			{
-				imageData.data[getRedValueIndex(510,j,i)] = 0;
-			}
-	}
-	return imageData;
+function addGridToImage(imageWidth, imageHeight, context){
 	
+	var puzzlePieceWidth = imageWidth/NUM_ROWS_COLS_PIECES;
+	var puzzlePieceHeight = imageHeight/NUM_ROWS_COLS_PIECES;
+	for(var i =0;i<imageWidth;i+=puzzlePieceWidth)
+	{
+		for(var j=0;j<imageHeight;j+=puzzlePieceHeight)
+		{
+		context.strokeRect(CANVASMARGIN+i,CANVASMARGIN+j,puzzlePieceWidth,puzzlePieceHeight);
+		}
+	}
 }
