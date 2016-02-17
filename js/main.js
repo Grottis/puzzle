@@ -9,6 +9,7 @@ var NUM_ROWS_COLS_PIECES = 5;
 var correctSolution = new Array(NUM_ROWS_COLS_PIECES*NUM_ROWS_COLS_PIECES);
 var currentPositions = new Array(NUM_ROWS_COLS_PIECES*NUM_ROWS_COLS_PIECES);
 var grabbedPiece = null;
+var currentBoard;
 
 $(document).ready(function()
 {
@@ -31,24 +32,30 @@ function drawGameImage()
     var img = document.getElementById("first");
     ctx.drawImage(img, CANVASMARGIN,CANVASMARGIN);
 	createPuzzlePieces(img.width, img.height, ctx);
+	currentBoard = ctx.getImageData(0,0,canvas.width,canvas.height);
 }
 
 function mouseDownOnCanvas(event)
 {
-	$("#gameCanvas").css("cursor","move");
 	grabbedPiece = getPuzzlePieceUnderCursor(getMouseCoordsOnCanvas(event));
 	if(grabbedPiece != null)
+	{
+		$("#gameCanvas").css("cursor","move");
+		$("#gameCanvas").mousemove(mouseMoveOnCanvas);
 		grabPuzzlePiece(grabbedPiece);
+	}
 }
 
 function mouseMoveOnCanvas(event)
 {
-	console.log(event.pageX);
+	grabbedPiece.animate(getMouseCoordsOnCanvas(event));
+	//console.log(getMouseCoordsOnCanvas(event));
 }
 
 function mouseUpOnCanvas(event)
 {
 	$("#gameCanvas").css("cursor","default");
+	$("#gameCanvas").unbind("mousemove");
 	releasePuzzlePiece(getMouseCoordsOnCanvas(event));
 }
 
@@ -115,6 +122,7 @@ function getPuzzlePieceUnderCursor(coords)
 function grabPuzzlePiece(puzzlePiece)
 {
 	ctx.clearRect(puzzlePiece.xPos, puzzlePiece.yPos, puzzlePiece.width, puzzlePiece.height);
+	currentBoard = ctx.getImageData(0,0,canvas.width,canvas.height);
 	//animateMove();
 }
 
@@ -122,10 +130,16 @@ function releasePuzzlePiece(coords)
 {
 	grabbedPiece.xPos = coords[0];
 	grabbedPiece.yPos = coords[1];
+	ctx.putImageData(currentBoard,0,0);
 	ctx.putImageData(grabbedPiece.pixels,coords[0],coords[1])
+	currentBoard = ctx.getImageData(0,0,canvas.width,canvas.height);
 	console.log("Release: "+coords);
 }
 
+function animateMove(piece, coords)
+{
+	console.log(piece,coords);
+}
 //Puzzlepiece object
 function puzzlePiece(x, y, width, height,imageData){
 
@@ -134,4 +148,5 @@ function puzzlePiece(x, y, width, height,imageData){
 	this.width = width;
 	this.height = height;
 	this.pixels = imageData;
+	this.animate = function(coords) { ctx.putImageData(this.pixels,coords[0],coords[1]);}
 }
