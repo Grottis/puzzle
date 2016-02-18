@@ -99,7 +99,7 @@ function createPuzzlePieces(imageWidth, imageHeight, context){
 		for(var j=0;j<imageWidth;j+=puzzlePieceWidth)
 		{
 			context.strokeRect(CANVASMARGIN+i,CANVASMARGIN+j,puzzlePieceWidth,puzzlePieceHeight);
-			correctSolution[k] = new puzzlePiece(CANVASMARGIN + j, CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight, ctx.getImageData(CANVASMARGIN + j,CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight));
+			correctSolution[k] = new puzzlePiece(k, CANVASMARGIN + j, CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight, ctx.getImageData(CANVASMARGIN + j,CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight));
 			k++;
 		}
 	}
@@ -123,7 +123,12 @@ function grabPuzzlePiece(puzzlePiece)
 {
 	ctx.clearRect(puzzlePiece.xPos, puzzlePiece.yPos, puzzlePiece.width, puzzlePiece.height);
 	currentBoard = ctx.getImageData(0,0,canvas.width,canvas.height);
-	//animateMove();
+	ctx.shadowBlur=40;
+	ctx.shadowColor = "black";
+	ctx.shadowOffsetX = 20;
+	ctx.shadowOffsetY = 20;
+	ctx.fillRect(puzzlePiece.xPos-5,puzzlePiece.yPos-5,puzzlePiece.width,puzzlePiece.height);
+	ctx.putImageData(puzzlePiece.pixels,puzzlePiece.xPos-5,puzzlePiece.yPos-5);
 }
 
 function releasePuzzlePiece(coords)
@@ -141,12 +146,21 @@ function animateMove(piece, coords)
 	console.log(piece,coords);
 }
 //Puzzlepiece object
-function puzzlePiece(x, y, width, height,imageData){
-
+function puzzlePiece(id, x, y, width, height,imageData){
+	this.id = id;
 	this.xPos = x;
 	this.yPos = y;
 	this.width = width;
 	this.height = height;
 	this.pixels = imageData;
-	this.animate = function(coords) { ctx.putImageData(this.pixels,coords[0],coords[1]);}
+	this.animate = function(coords) {
+	//create new canvas on top of old one, render animation on new canvas.
+	//z-index 0 z-index 1....
+	//ctx.clearRect(puzzlePiece.xPos, puzzlePiece.yPos, puzzlePiece.width, puzzlePiece.height);
+	//currentBoard = ctx.getImageData(0,0,canvas.width,canvas.height);
+	moveCanvas.clearRect(0,0,800,600);
+	moveCanvas.fillRect(coords[0],coords[1],width,height);
+	moveCanvas.putImageData(this.pixels,coords[0],coords[1]);
+	}
 }
+
