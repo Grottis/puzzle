@@ -26,6 +26,7 @@ function startGame()
 {
 	drawGameImage();
 	currentPositions = correctSolution;
+	drawBackground();
 }
 
 //Draws image on canvas
@@ -35,7 +36,8 @@ function drawGameImage()
     backgroundCanvas.drawImage(img, CANVASMARGIN,CANVASMARGIN);
 	createPuzzlePieces(img.width, img.height, backgroundCanvas);
 	currentBoard = backgroundCanvas.getImageData(0,0,canvasWidth,canvasHeight);
-	//ctx.clearRect(0,0,800,600);
+	backgroundCanvas.clearRect(0,0,canvasWidth,canvasHeight);
+
 }
 
 function drawBackground()
@@ -84,23 +86,35 @@ function createPuzzlePieces(imageWidth, imageHeight, context){
 
 	var puzzlePieceWidth = imageWidth/NUM_ROWS_COLS_PIECES;
 	var puzzlePieceHeight = imageHeight/NUM_ROWS_COLS_PIECES;
-	var k = 0;
+	var id = 0;
 	for(var i =0;i<imageHeight;i+=puzzlePieceHeight)
 	{
 		for(var j=0;j<imageWidth;j+=puzzlePieceWidth)
 		{
-			context.strokeRect(CANVASMARGIN+i,CANVASMARGIN+j,puzzlePieceWidth,puzzlePieceHeight);
-			correctSolution[k] = new puzzlePiece(k, CANVASMARGIN + j, CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight, 
+			//context.strokeRect(CANVASMARGIN+i,CANVASMARGIN+j,puzzlePieceWidth,puzzlePieceHeight);
+			correctSolution[id] = new puzzlePiece(id, CANVASMARGIN + j, CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight, 
 									context.getImageData(CANVASMARGIN + j,CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight));
-			k++;
+			id++;
 		}
 	}
+	createVisualPieces(correctSolution);
+}
+
+function createVisualPieces(puzzlePieces)
+{
+	for(var i =0;i<puzzlePieces.length;i++)
+	{
+		moveCanvas.clearRect(0, 0, canvasWidth, canvasHeight);
+		moveCanvas.putImageData(puzzlePieces[i].pixels, 0, 0);
+		moveCanvas.strokeRect(0, 0, puzzlePieces[i].width, puzzlePieces[i].height);
+		puzzlePieces[i].pixels = moveCanvas.getImageData(0, 0, puzzlePieces[i].width, puzzlePieces[i].height);
+	}
+	moveCanvas.clearRect(0, 0, canvasWidth, canvasHeight);
 }
 
 function getPuzzlePieceUnderCursor(coords)
 {
-	var l = currentPositions.length;
-	for(var i = 0;i<l;i++)
+	for(var i = currentPositions.length-1;i>=0;i--)
 	{
 		if(coords[0] >= currentPositions[i].xPos && 
 		   coords[0] <= currentPositions[i].xPos + currentPositions[i].width &&
