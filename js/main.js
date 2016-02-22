@@ -12,7 +12,8 @@ var grabbedPiece = null;
 var currentBoard;
 var canvasWidth = 800;
 var canvasHeight = 600;
-
+var imageWidth = 490;
+var imageHeight = 490;
 $(document).ready(function()
 {
 	$("#startGame").click(startGame);
@@ -43,6 +44,7 @@ function drawGameImage()
 function drawBackground()
 {
 	backgroundCanvas.clearRect(0,0,canvasWidth,canvasHeight);
+	backgroundCanvas.strokeRect(CANVASMARGIN,CANVASMARGIN,imageWidth,imageHeight);
 	for(var i = 0;i<currentPositions.length;i++)
 	{
 		if(!currentPositions[i].grabbed)
@@ -70,6 +72,7 @@ function mouseUpOnCanvas(event)
 {
 	$("#offCanvas").css("cursor","default");
 	$("#offCanvas").unbind("mousemove");
+	if(grabbedPiece != null)
 	releasePuzzlePiece(getMouseCoordsOnCanvas(event));
 }
 
