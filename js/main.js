@@ -36,9 +36,20 @@ $(document).ready(function()
 //Starts the game
 function startGame()
 {
-	drawGameImage();
+	randomizePieces();
 	drawBackground();
+	$("#startGame").prop("disabled",true);
 }
+
+function randomizePieces()
+{
+	for(var i =0;i<currentPositions.length;i++)
+	{
+		currentPositions[i].xPos = Math.floor(Math.random() * MAX_IMAGE_WIDTH-CANVASMARGIN) + CANVASMARGIN;
+		currentPositions[i].yPos = Math.floor(Math.random() * MAX_IMAGE_HEIGHT-CANVASMARGIN) + CANVASMARGIN;
+	}
+}
+
 function handleUploadFile()
 {
 	var file = $("#uploadFile").get(0).files[0];
@@ -61,16 +72,16 @@ function handleUploadFile()
 		puzzleImage = hiddenCtx.getImageData(0,0,ratio.width,ratio.height);
 		imageWidth = ratio.width;
 		imageHeight = ratio.height;
+		drawGameImage();
+		drawBackground();
 	})
 
 }
-
 
 //http://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio
 function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
 
     var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
-
     return { width: srcWidth*ratio, height: srcHeight*ratio };
 }
 
@@ -165,6 +176,7 @@ function createPuzzlePieces(imageWidth, imageHeight, context){
 		}
 	}
 	createVisualPieces(currentPositions);
+
 }
 
 function createVisualPieces(puzzlePieces)
@@ -236,10 +248,6 @@ function releasePuzzlePiece(coords)
 	drawBackground();
 }
 
-function animateMove(piece, coords)
-{
-	console.log(piece,coords);
-}
 //Puzzlepiece object
 function puzzlePiece(id, x, y, width, height, imageData){
 	this.id = id;
@@ -259,25 +267,4 @@ function puzzlePiece(id, x, y, width, height, imageData){
 	this.draw = function(canvas){
 		canvas.putImageData(this.pixels,this.xPos,this.yPos);
 	}
-}
-
-//Functions to get index from imagedata object
-function getRedValueIndex(width, x, y)
-{
-	return ((y - 1) * (width * 4)) + ((x - 1) * 4);
-}
-
-function getGreenValueIndex(width, x, y)
-{
-	return getRedValue(width,x,y) + 1;
-}
-
-function getBlueValueIndex(width, x, y)
-{
-	return getRedValue(width, x, y) + 2;
-}
-
-function getAlphaValueIndex(width, x, y)
-{
-	return getRedValue(width, x, y) + 3;
 }
