@@ -11,10 +11,8 @@ var NUM_ROWS_PIECES = 5;
 var MAX_IMAGE_WIDTH = 640;
 var MAX_IMAGE_HEIGHT = 480;
 
-var correctSolution = new Array(NUM_COLS_PIECES*NUM_ROWS_PIECES);
 var currentPositions = new Array(NUM_COLS_PIECES*NUM_ROWS_PIECES);
 var grabbedPiece = null;
-var currentBoard;
 
 var puzzleImage = null;
 
@@ -25,6 +23,7 @@ var canvasHeight = 768;
 var imageWidth = 490;
 var imageHeight = 490;
 
+var correctCoordinates = [];
 $(document).ready(function()
 {
 	$("#startGame").click(startGame);
@@ -38,7 +37,6 @@ $(document).ready(function()
 function startGame()
 {
 	drawGameImage();
-	currentPositions = correctSolution;
 	drawBackground();
 }
 function handleUploadFile()
@@ -90,9 +88,7 @@ function drawGameImage()
 		backgroundCanvas.putImageData(puzzleImage,CANVASMARGIN,CANVASMARGIN);
 		createPuzzlePieces(imageWidth, imageHeight, backgroundCanvas);
 	}
-	currentBoard = backgroundCanvas.getImageData(0,0,canvasWidth,canvasHeight);
 	backgroundCanvas.clearRect(0,0,canvasWidth,canvasHeight);
-
 }
 
 function drawBackground()
@@ -104,6 +100,19 @@ function drawBackground()
 		if(!currentPositions[i].grabbed)
 			currentPositions[i].draw(backgroundCanvas);
 	}
+}
+
+function checkSolution()
+{
+	var correctPieces = 0;
+	for(var i = 0;i<currentPositions.length;i++)
+	{
+		if(currentPositions[i].xPos == currentPositions[i].correctX &&
+			currentPositions[i].yPos == currentPositions[i].correctY)
+			correctPieces++;
+	}
+	if(correctPieces == NUM_COLS_PIECES*NUM_ROWS_PIECES)
+		console.log("You Win");
 }
 
 function mouseDownOnCanvas(event)
@@ -128,13 +137,14 @@ function mouseUpOnCanvas(event)
 	$("#offCanvas").unbind("mousemove");
 	if(grabbedPiece != null)
 	releasePuzzlePiece(getMouseCoordsOnCanvas(event));
+	checkSolution();
 }
 
 //Function to get mouse coordinates
 function getMouseCoordsOnCanvas(event)
 {
-	var x = event.pageX - $("#gameCanvas").get(0).offsetLeft - CANVASMARGIN;
-	var y = event.pageY - $("#gameCanvas").get(0).offsetTop  - CANVASMARGIN;
+	var x = event.pageX - $("#gameCanvas").get(0).offsetLeft;
+	var y = event.pageY - $("#gameCanvas").get(0).offsetTop;
 	return [x, y];
 }
 
@@ -149,11 +159,12 @@ function createPuzzlePieces(imageWidth, imageHeight, context){
 		for(var j=0;j<imageWidth;j+=puzzlePieceWidth)
 		{
 			var puzzlePixels = context.getImageData(CANVASMARGIN + j,CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight);
-			correctSolution[id] = new puzzlePiece(id, CANVASMARGIN + j, CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight, puzzlePixels);
+			currentPositions[id] = new puzzlePiece(id, CANVASMARGIN + j, CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight, puzzlePixels);
+			correctCoordinates[id] = [CANVASMARGIN+j,CANVASMARGIN+i];
 			id++;
 		}
 	}
-	createVisualPieces(correctSolution);
+	createVisualPieces(currentPositions);
 }
 
 function createVisualPieces(puzzlePieces)
@@ -188,7 +199,6 @@ function grabPuzzlePiece(puzzlePiece)
 	puzzlePiece.grabbed = true;
 	backgroundCanvas.clearRect(puzzlePiece.xPos, puzzlePiece.yPos, puzzlePiece.width, puzzlePiece.height);
 	drawBackground();
-	currentBoard = backgroundCanvas.getImageData(0,0,canvasWidth,canvasHeight);
 	moveCanvas.shadowBlur=40;
 	moveCanvas.shadowColor = "black";
 	moveCanvas.shadowOffsetX = 20;
@@ -208,12 +218,22 @@ function isGrabbed(element, index, array){
 
 function releasePuzzlePiece(coords)
 {
+	var distance;
+	for(var i =0;i<correctCoordinates.length;i++)
+	{
+		distance = Math.hypot(coords[0]-correctCoordinates[i][0],coords[1]-correctCoordinates[i][1]);
+		if(distance < 20)
+		{
+			coords[0] = correctCoordinates[i][0];
+			coords[1] = correctCoordinates[i][1];
+			break;
+		}
+	}
 	grabbedPiece.xPos = coords[0];
 	grabbedPiece.yPos = coords[1];
 	grabbedPiece.grabbed = false;
 	moveCanvas.clearRect(0,0,canvasWidth,canvasHeight);
 	drawBackground();
-	currentBoard = backgroundCanvas.getImageData(0,0,canvasWidth,canvasHeight);
 }
 
 function animateMove(piece, coords)
@@ -221,10 +241,12 @@ function animateMove(piece, coords)
 	console.log(piece,coords);
 }
 //Puzzlepiece object
-function puzzlePiece(id, x, y, width, height,imageData){
+function puzzlePiece(id, x, y, width, height, imageData){
 	this.id = id;
 	this.xPos = x;
 	this.yPos = y;
+	this.correctX = x;
+	this.correctY = y;
 	this.width = width;
 	this.height = height;
 	this.pixels = imageData;
