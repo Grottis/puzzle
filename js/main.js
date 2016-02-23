@@ -148,9 +148,8 @@ function createPuzzlePieces(imageWidth, imageHeight, context){
 	{
 		for(var j=0;j<imageWidth;j+=puzzlePieceWidth)
 		{
-			//context.strokeRect(CANVASMARGIN+i,CANVASMARGIN+j,puzzlePieceWidth,puzzlePieceHeight);
-			correctSolution[id] = new puzzlePiece(id, CANVASMARGIN + j, CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight, 
-									context.getImageData(CANVASMARGIN + j,CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight));
+			var puzzlePixels = context.getImageData(CANVASMARGIN + j,CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight);
+			correctSolution[id] = new puzzlePiece(id, CANVASMARGIN + j, CANVASMARGIN + i, puzzlePieceWidth, puzzlePieceHeight, puzzlePixels);
 			id++;
 		}
 	}
