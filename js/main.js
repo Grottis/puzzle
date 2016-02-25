@@ -1,13 +1,14 @@
 "use strict";
 var backgroundCanvas;
 var moveCanvas;
-//Global constants
-//number of pixels to use as border
-var CANVASMARGIN = 10;
-//number of rows and columns of the puzzlepieces
-var NUM_COLS_PIECES = 5;
-var NUM_ROWS_PIECES = 5;
-//Max size of puzzle board
+var solutionCanvas;
+var victoryCanvas;
+
+var CANVASMARGIN = 20;
+
+var NUM_COLS_PIECES = 1;
+var NUM_ROWS_PIECES = 1;
+
 var MAX_IMAGE_WIDTH = 640;
 var MAX_IMAGE_HEIGHT = 480;
 
@@ -19,28 +20,71 @@ var puzzleImage = null;
 var canvasWidth = 1024;
 var canvasHeight = 768;
 
-
-var imageWidth = 490;
-var imageHeight = 490;
+var imageWidth = 0;
+var imageHeight = 0;
 
 var correctCoordinates = [];
 $(document).ready(function()
 {
 	$("#startGame").click(startGame);
-	$("#offCanvas").mousedown(mouseDownOnCanvas).mouseup(mouseUpOnCanvas);
-	backgroundCanvas = document.getElementById("gameCanvas").getContext("2d");
-	moveCanvas = document.getElementById("offCanvas").getContext("2d");
+	$("#moveCanvas").mousedown(mouseDownOnCanvas).mouseup(mouseUpOnCanvas);
+	backgroundCanvas = document.getElementById("backgroundCanvas").getContext("2d");
+	moveCanvas = document.getElementById("moveCanvas").getContext("2d");
+	solutionCanvas = document.getElementById("solutionCanvas").getContext("2d");
+	victoryCanvas = document.getElementById("victoryCanvas").getContext("2d");
 	$("#uploadFile").change(handleUploadFile);
+	$("#help").click(showSolutionCanvas);
+	$("#giveUp").click(showConfirmGiveUp);
+	$("#giveUpYes").click(restart);
+	$("#restart").click(restart);
+	$("#giveUpNo").click(function(){$("#confirmGiveUp").hide();});
 });
+
+function displayVictory()
+{
+	$("#youWin").show();
+	backgroundCanvas.clearRect(0,0,canvasWidth,canvasHeight);
+	moveCanvas.clearRect(0,0,canvasWidth,canvasHeight);
+	victoryCanvas.putImageData(puzzleImage,canvasWidth/5,canvasHeight/5);
+	victoryCanvas.fillStyle = "blue";
+	victoryCanvas.font = "50px Arial";
+	victoryCanvas.fillText("Congratulations!",330,100);
+	$("#giveUp").hide();
+	$("#help").hide();
+	$("#restart").show();
+}
+
+function showConfirmGiveUp()
+{
+	$("#confirmGiveUp").show();
+}
+
+function showSolutionCanvas()
+{
+	if($("#hint").is(":hidden"))
+		$("#hint").slideDown("slow");
+	else
+		$("#hint").slideUp();
+}
 
 //Starts the game
 function startGame()
 {
+	$("#gameInstructions").hide();
+	$("#help").show();
+	$("#giveUp").show();
 	randomizePieces();
 	drawBackground();
-	$("#startGame").prop("disabled",true);
+	drawSolution();
 }
-
+function drawSolution()
+{
+	$("#hint").css("width", imageWidth);
+	$("#hint").css("height", imageHeight);
+	$("#solutionCanvas").attr("width",imageWidth);
+	$("#solutionCanvas").attr("height",imageHeight);
+	solutionCanvas.putImageData(puzzleImage,0,0);
+}
 function randomizePieces()
 {
 	for(var i =0;i<currentPositions.length;i++)
@@ -123,7 +167,7 @@ function checkSolution()
 			correctPieces++;
 	}
 	if(correctPieces == NUM_COLS_PIECES*NUM_ROWS_PIECES)
-		console.log("You Win");
+		displayVictory();
 }
 
 function mouseDownOnCanvas(event)
@@ -131,8 +175,8 @@ function mouseDownOnCanvas(event)
 	grabbedPiece = getPuzzlePieceUnderCursor(getMouseCoordsOnCanvas(event));
 	if(grabbedPiece != null)
 	{
-		$("#offCanvas").css("cursor","move");
-		$("#offCanvas").mousemove(mouseMoveOnCanvas);
+		$("#moveCanvas").css("cursor","move");
+		$("#moveCanvas").mousemove(mouseMoveOnCanvas);
 		grabPuzzlePiece(grabbedPiece);
 	}
 }
@@ -144,8 +188,8 @@ function mouseMoveOnCanvas(event)
 
 function mouseUpOnCanvas(event)
 {
-	$("#offCanvas").css("cursor","default");
-	$("#offCanvas").unbind("mousemove");
+	$("#moveCanvas").css("cursor","default");
+	$("#moveCanvas").unbind("mousemove");
 	if(grabbedPiece != null)
 	releasePuzzlePiece(getMouseCoordsOnCanvas(event));
 	checkSolution();
@@ -154,8 +198,9 @@ function mouseUpOnCanvas(event)
 //Function to get mouse coordinates
 function getMouseCoordsOnCanvas(event)
 {
-	var x = event.pageX - $("#gameCanvas").get(0).offsetLeft;
-	var y = event.pageY - $("#gameCanvas").get(0).offsetTop;
+	var offset = $("#backgroundCanvas").offset();
+	var x = event.pageX - offset.left;
+	var y = event.pageY - offset.top;
 	return [x, y];
 }
 
@@ -267,4 +312,9 @@ function puzzlePiece(id, x, y, width, height, imageData){
 	this.draw = function(canvas){
 		canvas.putImageData(this.pixels,this.xPos,this.yPos);
 	}
+}
+
+function restart()
+{
+	location.reload()
 }

@@ -1,31 +1,163 @@
 
-#gameCanvas{
-/* 	border:solid 1px black; */
-/* 	border-radius:15px; */
+#container{
+	width:1080px;
+	margin:0 auto;
+	font-family:arial;
+}
+
+#backgroundCanvas{
 	display:block;
-	position:relative;
+	position:absolute;
+	top:10px;
+	left:30px;
 	z-index:0;
 	border:solid 0px black;
 	background-color:white;
 }
-#offCanvas{
+
+#moveCanvas{
 	position:absolute;
-	left:36px;
-	top:95px;
+	top:10px;
+	left:30px;
 	z-index:1;
 	border:solid 0px red;
-
 }
 
 #canvasFrame{
-	
-	display:flex;justify-content:center;align-items:center;
+	position:relative;
 	border:solid 1px;
 	width:1080px;
-	height:900px;
+	height:800px;
 	border-radius:15px;
-	background-color:gold;
+	background-color:Wheat;
 }
+
+#gameInstructions{
+	opacity:0.8;
+	background-color:white;
+	position:absolute;
+	top:10px;
+	left:30px;
+	border:solid 1px black;
+	width:1024px;
+	height:768px;
+	z-index:2;
+}
+
+#instructions{
+	position:absolute;
+	right:0px;
+	top:0px;
+	width:300px;
+
+}
+
+#dummy{
+	width:640px;
+	height:480px;
+}
+
 .hidden{
+	display:none;
+}
+.tnail{
+	margin:5px;
+	width:100px;
+	height:100px;
+}
+.imgContainer{
+	float:left;
+	width:110px;
+	height:110px;
+	margin-left:15px;
+}
+
+.imgContainer:hover{
+	background-color:black;
+	cursor:pointer;
+}
+
+span{
+	font-weight:bold;
+}
+
+span:hover{
+	cursor:pointer;
+}
+
+#help{
+	position:absolute;
+	right:7px;
+	top:25px;
+	font-size:25px;
+	display:none;
+}
+
+#giveUp{
+	position:absolute;
+	bottom:0px;
+	left:50%;
+	display:none;
+}
+
+#hint{
+	position:absolute;
+	top:10px;
+	right:30px;
+	width:640px;
+	height:480px;
+	z-index:0;
+	display:none;
+	background-color:white;
+}
+
+#confirmGiveUp{
+	position:relative;
+	left:40%;
+	top:40%;
+	z-index:10;
+	width:300px;
+	height:150px;
+	border:solid 1px black;
+	border-radius:30px;
+	background-color:Wheat;
+	display:none;
+}
+#confirmGiveUp p{
+	margin-left:30px;
+}
+
+#confirmGiveUp button{
+	position:relative;
+	left:30px;
+	height:35px;
+	width:50px;
+	padding:5px;
+	margin:30px;
+	border:0px;
+}
+
+#giveUpYes{
+	background-color:green;
+}
+
+#giveUpNo{
+	background-color:red;
+}
+
+#youWin{
+	position:absolute;
+	top:10px;
+	left:30px;
+	width:1024px;
+	height:768px;
+	border:solid 1px black;
+	z-index:10;
+	display:none;
+}
+#restart{
+	position:absolute;
+	bottom:0px;
+	left:50%;
 	display:none;
 }

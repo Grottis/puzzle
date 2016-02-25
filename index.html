@@ -4,21 +4,48 @@
 		<meta charset="utf-8">
 		<title>Puzzle game</title>
 		<link rel="stylesheet" href="css/main.css"/>
-		<!--<script src="js/jquery-1.11.3.min.js"></script>-->
-		
 		<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
 		<script src="js/main.js"></script>
 	</head>
 	<body>
-		<input type = "file" id = "uploadFile">
-		<button id="startGame">Start Game</button>
-		<div id="canvasFrame">
-			<canvas id="gameCanvas" width="1024" height="768">
-			</canvas>
-		
+		<div id="container">
+			<div id="canvasFrame">
+				<canvas id="backgroundCanvas" width="1024" height="768">
+				</canvas>
+				<canvas id="moveCanvas" width="1024" height="768">
+				</canvas>
+				<span id="help">?</span>
+				<span id="giveUp">Give Up</span>
+				<span id="restart">Restart</span>
+				<div id="gameInstructions">
+					<div id="instructions">
+						<h1>The Puzzle</h1>
+						<p>Select a picture from your hard drive or make your choice from the images below</p>
+						<div class="imgContainer">
+							<img id="first" class="tnail" src="img/first.png" alt="Red picture"/>
+						</div>
+						<div class="imgContainer">
+							<img id="first" class="tnail" src="img/first.png" alt="Red picture"/>
+						</div>
+						<div class="imgContainer">
+							<img id="first" class="tnail" src="img/first.png" alt="Red picture"/>
+						</div>
+						<input type="file" id="uploadFile" value="Choose file"/>
+						<button id="startGame">Start Game</button>
+					</div>
+				</div>
+				<div id="hint">
+					<canvas id="solutionCanvas" width="640" height="480"></canvas>
+				</div>
+				<div id="confirmGiveUp">
+					<p>Are you sure you want to give up?</p>
+					<button id="giveUpYes">Yes</button>
+					<button id="giveUpNo">No</button>
+				</div>
+				<div id="youWin">
+					<canvas id="victoryCanvas" width="1024" height="768"></canvas>
+				</div>
+			</div>
 		</div>
-			
-		<canvas id="offCanvas" width="1024" height="768"></canvas>
-		<img id="first" class="hidden" src="img/first.png" alt="Red picture"/>
 	</body>
 </html>
