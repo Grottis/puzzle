@@ -6,8 +6,8 @@ var victoryCanvas;
 
 var CANVASMARGIN = 20;
 
-var NUM_COLS_PIECES = 1;
-var NUM_ROWS_PIECES = 1;
+var NUM_COLS_PIECES = 5;
+var NUM_ROWS_PIECES = 5;
 
 var MAX_IMAGE_WIDTH = 640;
 var MAX_IMAGE_HEIGHT = 480;
