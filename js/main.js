@@ -62,6 +62,7 @@ function handleImage(event)
 	if(event.data.premadeOrUpload === "upload")
 	{
 		var file = $("#uploadFile").get(0).files[0];
+		$("label[for=uploadFile]").text(file.name);
 		img.src = window.URL.createObjectURL(file);
 	}
 	else
@@ -137,6 +138,8 @@ function createVisualPieces(puzzlePieces)
 		puzzlePieces[i].pixels = moveCanvas.getImageData(0, 0, puzzlePieces[i].width, puzzlePieces[i].height);
 	}
 	moveCanvas.clearRect(0, 0, canvasWidth, canvasHeight);
+	$("#startGame").prop("disabled",false);
+	$("#startGame").css("cursor","pointer");
 }
 
 function drawBackground()
