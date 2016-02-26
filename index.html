@@ -21,16 +21,13 @@
 					<div id="instructions">
 						<h1>The Puzzle</h1>
 						<p>Select a picture from your hard drive or make your choice from the images below</p>
-						<div class="imgContainer">
+						<div class="imageContainer">
 							<img id="first" class="tnail" src="img/first.png" alt="Red picture"/>
 						</div>
-						<div class="imgContainer">
-							<img id="first" class="tnail" src="img/first.png" alt="Red picture"/>
+						<div class="imageContainer">
+							<img id="second" class="tnail" src="img/second.png" alt="Red picture"/>
 						</div>
-						<div class="imgContainer">
-							<img id="first" class="tnail" src="img/first.png" alt="Red picture"/>
-						</div>
-						<input type="file" id="uploadFile" value="Choose file"/>
+						<input type="file" id="uploadFile"/>
 						<button id="startGame">Start Game</button>
 					</div>
 				</div>
@@ -47,5 +44,6 @@
 				</div>
 			</div>
 		</div>
+		<canvas id = "hiddenCanvas" height="1024" width = "768" class="hidden"></canvas>
 	</body>
 </html>

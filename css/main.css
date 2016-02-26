@@ -65,14 +65,14 @@
 	width:100px;
 	height:100px;
 }
-.imgContainer{
+.imageContainer{
 	float:left;
 	width:110px;
 	height:110px;
 	margin-left:15px;
 }
 
-.imgContainer:hover{
+.imageContainer:hover{
 	background-color:black;
 	cursor:pointer;
 }
