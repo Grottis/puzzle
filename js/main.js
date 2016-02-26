@@ -36,7 +36,7 @@ $(document).ready(function()
 	$(".imageContainer").click({premadeOrUpload:"preMade"},handleImage);
 	$("#uploadFile").on("change",{premadeOrUpload:"upload"},handleImage);
 	$("#startGame").click(startGame);
-	$("#moveCanvas").mousedown(mouseDownOnCanvas).mouseup(mouseUpOnCanvas);
+	$("#moveCanvas").mousedown(mouseDownOnCanvas).mouseup(mouseUpOnCanvas).mouseleave(resetPiece);
 	$("#help").click(showSolutionCanvas);
 	$("#giveUp").click(showConfirmGiveUp);
 	$("#giveUpYes").click(restart);
@@ -227,7 +227,10 @@ function setShadowVariables()
 
 function mouseMoveOnCanvas(event)
 {
-	grabbedPiece.animate(getMouseCoordsOnCanvas(event));
+	if(grabbedPiece != null)
+		grabbedPiece.animate(getMouseCoordsOnCanvas(event));
+	else
+		$("#moveCanvas").css("cursor","default");
 }
 
 function mouseUpOnCanvas(event)
@@ -257,10 +260,17 @@ function releasePuzzlePiece(coords)
 	grabbedPiece.xPos = coords[0];
 	grabbedPiece.yPos = coords[1];
 	grabbedPiece.grabbed = false;
+	grabbedPiece = null;
 	moveCanvas.clearRect(0,0,canvasWidth,canvasHeight);
 	drawBackground();
 }
-
+function resetPiece(event)
+{
+	if(grabbedPiece != null)
+	{
+		releasePuzzlePiece(getMouseCoordsOnCanvas(event));
+	}
+}
 function getMouseCoordsOnCanvas(event)
 {
 	var offset = $("#backgroundCanvas").offset();
