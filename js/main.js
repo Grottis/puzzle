@@ -33,10 +33,10 @@ $(document).ready(function()
 	victoryCanvas = document.getElementById("victoryCanvas").getContext("2d");
 	hiddenCanvas = document.getElementById("hiddenCanvas").getContext("2d");
 
-	$("#moveCanvas").mousedown(mouseDownOnCanvas).mouseup(mouseUpOnCanvas);
 	$(".imageContainer").click({premadeOrUpload:"preMade"},handleImage);
 	$("#uploadFile").on("change",{premadeOrUpload:"upload"},handleImage);
 	$("#startGame").click(startGame);
+	$("#moveCanvas").mousedown(mouseDownOnCanvas).mouseup(mouseUpOnCanvas);
 	$("#help").click(showSolutionCanvas);
 	$("#giveUp").click(showConfirmGiveUp);
 	$("#giveUpYes").click(restart);
@@ -44,7 +44,6 @@ $(document).ready(function()
 	$("#giveUpNo").click(function(){$("#confirmGiveUp").hide();});
 });
 
-//Starts the game
 function startGame()
 {
 	$("#gameInstructions").hide();
@@ -54,36 +53,6 @@ function startGame()
 	drawBackground();
 	drawSolution();
 }
-
-function randomizePieces()
-{
-	for(var i =0;i<currentPositions.length;i++)
-	{
-		currentPositions[i].xPos = Math.floor(Math.random() * MAX_IMAGE_WIDTH-CANVASMARGIN) + CANVASMARGIN;
-		currentPositions[i].yPos = Math.floor(Math.random() * MAX_IMAGE_HEIGHT-CANVASMARGIN) + CANVASMARGIN;
-	}
-}
-
-function drawBackground()
-{
-	backgroundCanvas.clearRect(0,0,canvasWidth,canvasHeight);
-	backgroundCanvas.strokeRect(CANVASMARGIN,CANVASMARGIN,imageWidth,imageHeight);
-	for(var i = 0;i<currentPositions.length;i++)
-	{
-		if(!currentPositions[i].grabbed)
-			currentPositions[i].draw(backgroundCanvas);
-	}
-}
-
-function drawSolution()
-{
-	$("#hint").css("width", imageWidth);
-	$("#hint").css("height", imageHeight);
-	$("#solutionCanvas").attr("width",imageWidth);
-	$("#solutionCanvas").attr("height",imageHeight);
-	solutionCanvas.putImageData(puzzleImage,0,0);
-}
-
 function handleImage(event)
 {
 	var img = document.createElement("img");
@@ -99,30 +68,26 @@ function handleImage(event)
 		img.src = $(this).find("img:first").attr("src");
 
 	$("#canvasFrame").append(img);
-	$("#puzzlePic").load({event:img},createPuzzleImage);
-
+	$("#puzzlePic").load({image:img},createPuzzleImage);
 }
 
-function createPuzzleImage(event)
+function createPuzzleImage(imageParam)
 {
-	var img = event.data.event;
+	var img = imageParam.data.image;
 	var ratio = calculateAspectRatioFit($(this).width(), $(this).height(), MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
-	hiddenCanvas.width = $(this).width();
-	hiddenCanvas.height = $(this).height();
-	$("#hiddenCanvas").attr("width",hiddenCanvas.width);
-	$("#hiddenCanvas").attr("height",hiddenCanvas.height);
-	hiddenCanvas.clearRect(0,0,hiddenCanvas.width,hiddenCanvas.height);
+	setHiddenCanvasSize($(this).width(),$(this).height());
+
 	var hiddenCtx = $("#hiddenCanvas").get(0).getContext("2d");
 	hiddenCtx.scale(ratio.width / hiddenCanvas.width, ratio.height / hiddenCanvas.height);
 	hiddenCtx.drawImage(img,0,0);
 	puzzleImage = hiddenCtx.getImageData(0,0,ratio.width,ratio.height);
+
 	imageWidth = ratio.width;
 	imageHeight = ratio.height;
 	drawGameImage();
 	drawBackground();
 	$("#puzzlePic").remove();
 }
-
 //http://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio
 function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
 
@@ -130,62 +95,20 @@ function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
     return { width: srcWidth*ratio, height: srcHeight*ratio };
 }
 
-//Draws image on canvas
+function setHiddenCanvasSize(width, height)
+{
+	hiddenCanvas.width = width;
+	hiddenCanvas.height = height;
+	$("#hiddenCanvas").attr("width",hiddenCanvas.width);
+	$("#hiddenCanvas").attr("height",hiddenCanvas.height);
+	hiddenCanvas.clearRect(0,0,hiddenCanvas.width,hiddenCanvas.height);
+}
 function drawGameImage()
 {
 	backgroundCanvas.putImageData(puzzleImage,CANVASMARGIN,CANVASMARGIN);
 	createPuzzlePieces(imageWidth, imageHeight, backgroundCanvas);
 	backgroundCanvas.clearRect(0,0,canvasWidth,canvasHeight);
 }
-
-function checkSolution()
-{
-	var correctPieces = 0;
-	for(var i = 0;i<currentPositions.length;i++)
-	{
-		if(currentPositions[i].xPos == currentPositions[i].correctX &&
-			currentPositions[i].yPos == currentPositions[i].correctY)
-			correctPieces++;
-	}
-	if(correctPieces == NUM_COLS_PIECES*NUM_ROWS_PIECES)
-		displayVictory();
-}
-
-function mouseDownOnCanvas(event)
-{
-	grabbedPiece = getPuzzlePieceUnderCursor(getMouseCoordsOnCanvas(event));
-	if(grabbedPiece != null)
-	{
-		$("#moveCanvas").css("cursor","move");
-		$("#moveCanvas").mousemove(mouseMoveOnCanvas);
-		grabPuzzlePiece(grabbedPiece);
-	}
-}
-
-function mouseMoveOnCanvas(event)
-{
-	grabbedPiece.animate(getMouseCoordsOnCanvas(event));
-}
-
-function mouseUpOnCanvas(event)
-{
-	$("#moveCanvas").css("cursor","default");
-	$("#moveCanvas").unbind("mousemove");
-	if(grabbedPiece != null)
-	releasePuzzlePiece(getMouseCoordsOnCanvas(event));
-	checkSolution();
-}
-
-//Function to get mouse coordinates
-function getMouseCoordsOnCanvas(event)
-{
-	var offset = $("#backgroundCanvas").offset();
-	var x = event.pageX - offset.left;
-	var y = event.pageY - offset.top;
-	return [x, y];
-}
-
-//Function to create puzzlepieces
 function createPuzzlePieces(imageWidth, imageHeight, context){
 
 	var puzzlePieceWidth = imageWidth/NUM_COLS_PIECES;
@@ -216,11 +139,51 @@ function createVisualPieces(puzzlePieces)
 	moveCanvas.clearRect(0, 0, canvasWidth, canvasHeight);
 }
 
+function drawBackground()
+{
+	backgroundCanvas.clearRect(0,0,canvasWidth,canvasHeight);
+	backgroundCanvas.strokeRect(CANVASMARGIN,CANVASMARGIN,imageWidth,imageHeight);
+	for(var i = 0;i<currentPositions.length;i++)
+	{
+		if(!currentPositions[i].grabbed)
+			currentPositions[i].draw(backgroundCanvas);
+	}
+}
+
+function randomizePieces()
+{
+	for(var i =0;i<currentPositions.length;i++)
+	{
+		currentPositions[i].xPos = Math.floor(Math.random() * MAX_IMAGE_WIDTH-CANVASMARGIN) + CANVASMARGIN;
+		currentPositions[i].yPos = Math.floor(Math.random() * MAX_IMAGE_HEIGHT-CANVASMARGIN) + CANVASMARGIN;
+	}
+}
+
+function drawSolution()
+{
+	$("#hint").css("width", imageWidth);
+	$("#hint").css("height", imageHeight);
+	$("#solutionCanvas").attr("width",imageWidth);
+	$("#solutionCanvas").attr("height",imageHeight);
+	solutionCanvas.putImageData(puzzleImage,0,0);
+}
+
+function mouseDownOnCanvas(event)
+{
+	grabbedPiece = getPuzzlePieceUnderCursor(getMouseCoordsOnCanvas(event));
+	if(grabbedPiece != null)
+	{
+		$("#moveCanvas").css("cursor","move");
+		$("#moveCanvas").mousemove(mouseMoveOnCanvas);
+		grabPuzzlePiece(grabbedPiece);
+	}
+}
+
 function getPuzzlePieceUnderCursor(coords)
 {
 	for(var i = currentPositions.length-1;i>=0;i--)
 	{
-		if(coords[0] >= currentPositions[i].xPos && 
+		if(coords[0] >= currentPositions[i].xPos &&
 		   coords[0] <= currentPositions[i].xPos + currentPositions[i].width &&
 		   coords[1] >= currentPositions[i].yPos &&
 		   coords[1] <= currentPositions[i].yPos + currentPositions[i].height)
@@ -234,14 +197,12 @@ function getPuzzlePieceUnderCursor(coords)
 function grabPuzzlePiece(puzzlePiece)
 {
 	puzzlePiece.grabbed = true;
-	backgroundCanvas.clearRect(puzzlePiece.xPos, puzzlePiece.yPos, puzzlePiece.width, puzzlePiece.height);
 	drawBackground();
-	moveCanvas.shadowBlur=40;
-	moveCanvas.shadowColor = "black";
-	moveCanvas.shadowOffsetX = 20;
-	moveCanvas.shadowOffsetY = 20;
-	moveCanvas.fillRect(puzzlePiece.xPos-5,puzzlePiece.yPos-5,puzzlePiece.width,puzzlePiece.height);
-	moveCanvas.putImageData(puzzlePiece.pixels,puzzlePiece.xPos-5,puzzlePiece.yPos-5);
+	setShadowVariables();
+
+	moveCanvas.fillRect(puzzlePiece.xPos,puzzlePiece.yPos,puzzlePiece.width,puzzlePiece.height);
+	moveCanvas.putImageData(puzzlePiece.pixels,puzzlePiece.xPos,puzzlePiece.yPos);
+
 	var remove = currentPositions.splice(currentPositions.findIndex(isGrabbed),1);
 	currentPositions.push(remove[0]);
 }
@@ -253,9 +214,33 @@ function isGrabbed(element, index, array){
 		return false;
 }
 
+function setShadowVariables()
+{
+	moveCanvas.shadowBlur=40;
+	moveCanvas.shadowColor = "black";
+	moveCanvas.shadowOffsetX = 20;
+	moveCanvas.shadowOffsetY = 20;
+}
+
+function mouseMoveOnCanvas(event)
+{
+	grabbedPiece.animate(getMouseCoordsOnCanvas(event));
+}
+
+function mouseUpOnCanvas(event)
+{
+	$("#moveCanvas").css("cursor","default");
+	$("#moveCanvas").unbind("mousemove");
+	if(grabbedPiece != null)
+	releasePuzzlePiece(getMouseCoordsOnCanvas(event));
+	checkSolution();
+}
+
 function releasePuzzlePiece(coords)
 {
 	var distance;
+	coords[0] -= grabbedPiece.width/2;
+	coords[1] -= grabbedPiece.height/2;
 	for(var i =0;i<correctCoordinates.length;i++)
 	{
 		distance = Math.hypot(coords[0]-correctCoordinates[i][0],coords[1]-correctCoordinates[i][1]);
@@ -273,7 +258,27 @@ function releasePuzzlePiece(coords)
 	drawBackground();
 }
 
-//Puzzlepiece object
+function getMouseCoordsOnCanvas(event)
+{
+	var offset = $("#backgroundCanvas").offset();
+	var x = event.pageX - offset.left;
+	var y = event.pageY - offset.top;
+	return [x, y];
+}
+
+function checkSolution()
+{
+	var correctPieces = 0;
+	for(var i = 0;i<currentPositions.length;i++)
+	{
+		if(currentPositions[i].xPos == currentPositions[i].correctX &&
+			currentPositions[i].yPos == currentPositions[i].correctY)
+			correctPieces++;
+	}
+	if(correctPieces == NUM_COLS_PIECES*NUM_ROWS_PIECES)
+		displayVictory();
+}
+
 function puzzlePiece(id, x, y, width, height, imageData){
 	this.id = id;
 	this.xPos = x;
@@ -286,8 +291,8 @@ function puzzlePiece(id, x, y, width, height, imageData){
 	this.grabbed = false;
 	this.animate = function(coords) {
 		moveCanvas.clearRect(0,0,canvasWidth,canvasHeight);
-		moveCanvas.fillRect(coords[0],coords[1],width,height);
-		moveCanvas.putImageData(this.pixels,coords[0],coords[1]);
+		moveCanvas.fillRect(coords[0] - this.width/2 ,coords[1] - this.height/2 ,width,height);
+		moveCanvas.putImageData(this.pixels, coords[0] - this.width/2, coords[1] - this.height/2);
 		}
 	this.draw = function(canvas){
 		canvas.putImageData(this.pixels,this.xPos,this.yPos);
