@@ -4,6 +4,7 @@ var moveCanvas;
 var solutionCanvas;
 var victoryCanvas;
 var hiddenCanvas;
+var victoryScreen;
 
 var CANVASMARGIN = 20;
 
@@ -52,6 +53,7 @@ function startGame()
 	randomizePieces();
 	drawBackground();
 	drawSolution();
+
 }
 function handleImage(event)
 {
@@ -201,7 +203,7 @@ function grabPuzzlePiece(puzzlePiece)
 {
 	puzzlePiece.grabbed = true;
 	drawBackground();
-	setShadowVariables();
+	setShadowVariables(moveCanvas);
 
 	moveCanvas.fillRect(puzzlePiece.xPos,puzzlePiece.yPos,puzzlePiece.width,puzzlePiece.height);
 	moveCanvas.putImageData(puzzlePiece.pixels,puzzlePiece.xPos,puzzlePiece.yPos);
@@ -217,12 +219,12 @@ function isGrabbed(element, index, array){
 		return false;
 }
 
-function setShadowVariables()
+function setShadowVariables(canvas)
 {
-	moveCanvas.shadowBlur=40;
-	moveCanvas.shadowColor = "black";
-	moveCanvas.shadowOffsetX = 20;
-	moveCanvas.shadowOffsetY = 20;
+	canvas.shadowBlur=40;
+	canvas.shadowColor = "black";
+	canvas.shadowOffsetX = 20;
+	canvas.shadowOffsetY = 20;
 }
 
 function mouseMoveOnCanvas(event)
@@ -317,19 +319,56 @@ function restart()
 	location.reload()
 }
 
+
 function displayVictory()
 {
+	initVictoryScreen();
 	$("#youWin").show();
 	backgroundCanvas.clearRect(0,0,canvasWidth,canvasHeight);
 	moveCanvas.clearRect(0,0,canvasWidth,canvasHeight);
-	victoryCanvas.putImageData(puzzleImage,canvasWidth/5,canvasHeight/5);
-	victoryCanvas.fillStyle = "blue";
-	victoryCanvas.font = "50px Arial";
-	victoryCanvas.fillText("Congratulations!",330,100);
+	victoryScreen.draw();
+	animateVictoryScreen();
 	$("#giveUp").hide();
 	$("#help").hide();
 	$("#restart").show();
 }
+
+function initVictoryScreen()
+{
+	victoryScreen = {
+	x:canvasWidth/2-puzzleImage.width/2,
+	y:110,
+	vx:5,
+	vy:3,
+	draw:function(){
+		victoryCanvas.putImageData(puzzleImage,this.x,this.y);
+	}
+	};
+}
+function clearVictoryScreen()
+{
+	victoryCanvas.fillStyle = 'rgba(255,255,255,0.3)';
+	victoryCanvas.fillRect(0,0,canvasWidth,canvasHeight);
+}
+
+
+function animateVictoryScreen()
+{
+	clearVictoryScreen();
+	victoryScreen.draw();
+	victoryScreen.x += victoryScreen.vx;
+	victoryScreen.y += victoryScreen.vy;
+	if( victoryScreen.x + victoryScreen.vx > canvasWidth-imageWidth ||
+		victoryScreen.x + victoryScreen.vy < 0 )
+			victoryScreen.vx = -victoryScreen.vx;
+
+	if( victoryScreen.y + victoryScreen.vy > canvasHeight-imageHeight ||
+		victoryScreen.y + victoryScreen.vy < 0)	
+			victoryScreen.vy = -victoryScreen.vy;
+
+	window.requestAnimationFrame(animateVictoryScreen);
+}
+
 
 function showConfirmGiveUp()
 {

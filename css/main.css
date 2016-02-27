@@ -182,7 +182,7 @@ span:hover{
 	left:30px;
 	width:1024px;
 	height:768px;
-	border:solid 1px black;
+	border:solid 1px green;
 	z-index:10;
 	display:none;
 }
